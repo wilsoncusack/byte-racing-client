@@ -37,17 +37,6 @@ const IndexPage = () => {
         const response = await axios.post<CompileResponse>(process.env.NEXT_PUBLIC_SERVER + '/compile_solidity', { code: updatedCode });
         setBytecode(response.data.bytecode);
         setAbi(JSON.parse(response.data.abi));
-
-        // Recompute gas usage for each function call
-        const functionCallsArray = functionCalls.split('\n');
-        functionCallsArray.forEach((line, index) => {
-          const call = line.match(/(\w+)\((.*)\)/);
-          if (call) {
-            const name = call[1];
-            const args = call[2].split(',').map((arg) => arg.trim()).filter(arg => arg !== '');
-            handleFunctionCall({ name, args }, index);
-          }
-        });
       } catch (error) {
         console.error('Compilation error:', error);
       }
@@ -59,6 +48,18 @@ const IndexPage = () => {
 
     return () => clearTimeout(delayDebounceFn);
   }, [solidityCode]);
+
+  useEffect(() => {
+     const functionCallsArray = functionCalls.split('\n');
+     functionCallsArray.forEach((line, index) => {
+       const call = line.match(/(\w+)\((.*)\)/);
+       if (call) {
+         const name = call[1];
+         const args = call[2].split(',').map((arg) => arg.trim()).filter(arg => arg !== '');
+         handleFunctionCall({ name, args }, index);
+       }
+     });
+  }, [bytecode])
 
   const handleFunctionCall = async (call: { name: string; args: string[] }, index: number) => {
     if (!abi.length) return;
