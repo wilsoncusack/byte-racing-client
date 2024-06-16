@@ -72,7 +72,7 @@ const IndexPage = () => {
 
     try {
       const response = await axios.post<{
-        result: {Success: {gas_used: string}};
+        gas_used: string, 
       }>(process.env.NEXT_PUBLIC_SERVER + '/execute_calldata', {
         bytecode,
         calldata,
@@ -80,9 +80,10 @@ const IndexPage = () => {
         caller: '0x0000000000000000000000000000000000000000',
       });
       const result = response.data;
+      console.log(result)
       setResult((prevResult) => {
         const newResult = [...prevResult];
-        newResult[index] = { call: call.name, gasUsed: result.result.Success.gas_used };
+        newResult[index] = { call: call.name, gasUsed: result.gas_used };
         return newResult;
       });
     } catch (error) {
