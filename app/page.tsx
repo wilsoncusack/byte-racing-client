@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Abi, Hex, decodeAbiParameters, encodeFunctionData } from 'viem';
+import { Abi, Hex, encodeFunctionData } from 'viem';
 
 const defaultSolidityCode = `
 contract SimpleStorage {
