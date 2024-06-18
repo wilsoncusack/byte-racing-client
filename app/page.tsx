@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Abi, encodeFunctionData } from 'viem';
+import { Abi, Hex, encodeFunctionData } from 'viem';
 
 const defaultSolidityCode = `
 contract SimpleStorage {
@@ -72,7 +72,7 @@ const IndexPage = () => {
 
     try {
       const response = await axios.post<{
-        result: {Success: {gas_used: string}};
+        Success: {gas_used: string, output: {Call: Hex}}
       }>(process.env.NEXT_PUBLIC_SERVER + '/execute_calldata', {
         bytecode,
         calldata,
@@ -82,7 +82,7 @@ const IndexPage = () => {
       const result = response.data;
       setResult((prevResult) => {
         const newResult = [...prevResult];
-        newResult[index] = { call: call.name, gasUsed: result.result.Success.gas_used };
+        newResult[index] = { call: call.name, gasUsed: result.Success.gas_used };
         return newResult;
       });
     } catch (error) {
