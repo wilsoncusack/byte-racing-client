@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Abi, Hex, encodeFunctionData } from 'viem';
+import { Abi, Address, DecodeEventLogReturnType, Hex, decodeEventLog, decodeFunctionResult, encodeFunctionData } from 'viem';
 
 const defaultSolidityCode = `
 contract SimpleStorage {
     uint256 public storedData;
+    event StoredDataUpdated(uint);
 
     function set(uint256 x) public {
         storedData = x;
+        emit StoredDataUpdated(x);
     }
 
     function get() public view returns (uint256) {
@@ -23,12 +25,18 @@ interface CompileResponse {
   bytecode: string;
 }
 
+type Log = {
+  address: Address, 
+  data: Hex, 
+  topics: Hex[]
+}
+
 const IndexPage = () => {
   const [solidityCode, setSolidityCode] = useState(defaultSolidityCode);
-  const [functionCalls, setFunctionCalls] = useState('');
+  const [functionCalls, setFunctionCalls] = useState('set(1)\nget()\nset(2)\nget()');
   const [bytecode, setBytecode] = useState('');
   const [abi, setAbi] = useState<Abi>([]);
-  const [result, setResult] = useState<Array<{ call: string; gasUsed: string }>>([]);
+  const [result, setResult] = useState<Array<{ call: string; gasUsed: string, response: string | undefined, logs: DecodeEventLogReturnType[]}>>([]);
 
   useEffect(() => {
     const compileSolidity = async () => {
@@ -51,40 +59,68 @@ const IndexPage = () => {
 
   useEffect(() => {
      const functionCallsArray = functionCalls.split('\n');
+     const calls: { name: string; args: string[] }[] = []
      functionCallsArray.forEach((line, index) => {
        const call = line.match(/(\w+)\((.*)\)/);
        if (call) {
          const name = call[1];
          const args = call[2].split(',').map((arg) => arg.trim()).filter(arg => arg !== '');
-         handleFunctionCall({ name, args }, index);
+         calls.push({ name, args });
        }
      });
-  }, [bytecode])
+     handleFunctionCalls(calls)
+  }, [bytecode, functionCalls])
 
-  const handleFunctionCall = async (call: { name: string; args: string[] }, index: number) => {
+  const handleFunctionCalls = async (parsedCalls: { name: string; args: string[] }[]) => {
     if (!abi.length) return;
 
-    const calldata = encodeFunctionData({
-      abi,
-      functionName: call.name,
-      args: call.args,
-    });
+    const calls: {calldata: Hex, value: String, caller: Address}[] = []
+    for (const call of parsedCalls) {
+      calls.push({
+        calldata: encodeFunctionData({
+          abi,
+          functionName: call.name,
+          args: call.args,
+        }),
+        value: '0',
+        caller: '0x0000000000000000000000000000000000000000'
+      })
+    }
 
     try {
-      const response = await axios.post<{
-        Success: {gas_used: string, output: {Call: Hex}}
-      }>(process.env.NEXT_PUBLIC_SERVER + '/execute_calldata', {
+      const response = await axios.post<
+        {Success: {gas_used: string, output: {Call: Hex}, logs: Log[]}}[]
+      >(process.env.NEXT_PUBLIC_SERVER + '/execute_calldatas', {
         bytecode,
-        calldata,
-        value: '0',
-        caller: '0x0000000000000000000000000000000000000000',
+        calls
       });
-      const result = response.data;
-      setResult((prevResult) => {
-        const newResult = [...prevResult];
-        newResult[index] = { call: call.name, gasUsed: result.Success.gas_used };
-        return newResult;
-      });
+      const results = response.data;
+
+      const output = []
+      for (const i in results) {
+        const result = results[i]
+        const returned = decodeFunctionResult({
+          abi,
+          functionName: parsedCalls[i].name,
+          data: result.Success.output.Call
+        })
+        const logs: DecodeEventLogReturnType[] = []
+        for (const log of result.Success.logs) {
+          logs.push(decodeEventLog({
+            abi,
+            data: log.data,
+            topics: log.topics as any
+          }))
+        }
+        output.push({ 
+              call: parsedCalls[i].name, 
+              gasUsed: result.Success.gas_used, 
+              response: returned != undefined ? String(returned) : undefined,
+              logs
+            })
+      }
+
+      setResult(output)
     } catch (error) {
       console.error('Execution error:', error);
     }
@@ -94,13 +130,6 @@ const IndexPage = () => {
     const newFunctionCalls = functionCalls.split('\n');
     newFunctionCalls[index] = e.target.value;
     setFunctionCalls(newFunctionCalls.join('\n'));
-  
-    const call = e.target.value.match(/(\w+)\((.*)\)/);
-    if (call) {
-      const name = call[1];
-      const args = call[2].split(',').map((arg) => arg.trim()).filter(arg => arg !== '');
-      handleFunctionCall({ name, args }, index);
-    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -132,7 +161,8 @@ const IndexPage = () => {
       </div>
       <div className="w-1/2 flex flex-col space-y-2">
         {functionCalls.split('\n').map((line, index) => (
-          <div key={index} className="flex items-center">
+          <div key={index}>
+          <div className="flex items-center">
             <textarea
               className="w-3/4 h-10 p-2 bg-gray-800 text-gray-300 resize-none"
               value={line}
@@ -141,6 +171,15 @@ const IndexPage = () => {
             <div className="w-1/4 h-10 p-2 bg-gray-700 text-gray-300">
               {result[index] ? `gas: ${result[index].gasUsed}` : ''}
             </div>
+          </div>
+          <div className="flex flex-row justify-between bg-gray-300">
+          {result[index] && <p className="font-mono">Returned: {result[index].response}</p>}
+          {result[index] &&
+            <div className="w-1/2 float-right font-mono">Logs: 
+              {result[index]?.logs.map((l, i) => <p key={i}>{l.eventName}({l.args?.join(', ')})</p>)}
+            </div>
+          }
+          </div>
           </div>
         ))}
       </div>
