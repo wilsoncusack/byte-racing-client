@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Abi, Hex, encodeFunctionData } from 'viem';
+import { Abi, Address, DecodeEventLogReturnType, Hex, decodeEventLog, decodeFunctionResult, encodeFunctionData } from 'viem';
 
 const defaultSolidityCode = `
 contract SimpleStorage {
@@ -23,12 +23,18 @@ interface CompileResponse {
   bytecode: string;
 }
 
+type Log = {
+  address: Address, 
+  data: Hex, 
+  topics: Hex[]
+}
+
 const IndexPage = () => {
   const [solidityCode, setSolidityCode] = useState(defaultSolidityCode);
   const [functionCalls, setFunctionCalls] = useState('');
   const [bytecode, setBytecode] = useState('');
   const [abi, setAbi] = useState<Abi>([]);
-  const [result, setResult] = useState<Array<{ call: string; gasUsed: string }>>([]);
+  const [result, setResult] = useState<Array<{ call: string; gasUsed: string, response: string | undefined, logs: DecodeEventLogReturnType[]}>>([]);
 
   useEffect(() => {
     const compileSolidity = async () => {
@@ -72,7 +78,7 @@ const IndexPage = () => {
 
     try {
       const response = await axios.post<{
-        Success: {gas_used: string, output: {Call: Hex}}
+        Success: {gas_used: string, output: {Call: Hex}, logs: Log[]}
       }>(process.env.NEXT_PUBLIC_SERVER + '/execute_calldata', {
         bytecode,
         calldata,
@@ -80,9 +86,28 @@ const IndexPage = () => {
         caller: '0x0000000000000000000000000000000000000000',
       });
       const result = response.data;
+      const returned = decodeFunctionResult({
+        abi,
+        functionName: call.name,
+        data: result.Success.output.Call
+      })
+      const logs: DecodeEventLogReturnType[] = []
+      for (const log of result.Success.logs) {
+        logs.push(decodeEventLog({
+          abi,
+          data: log.data,
+          topics: log.topics as any
+        }))
+      }
+      console.log('logs', logs)
       setResult((prevResult) => {
         const newResult = [...prevResult];
-        newResult[index] = { call: call.name, gasUsed: result.Success.gas_used };
+        newResult[index] = { 
+          call: call.name, 
+          gasUsed: result.Success.gas_used, 
+          response: returned != undefined ? String(returned) : undefined,
+          logs
+        };
         return newResult;
       });
     } catch (error) {
@@ -132,7 +157,8 @@ const IndexPage = () => {
       </div>
       <div className="w-1/2 flex flex-col space-y-2">
         {functionCalls.split('\n').map((line, index) => (
-          <div key={index} className="flex items-center">
+          <div key={index}>
+          <div className="flex items-center">
             <textarea
               className="w-3/4 h-10 p-2 bg-gray-800 text-gray-300 resize-none"
               value={line}
@@ -141,6 +167,15 @@ const IndexPage = () => {
             <div className="w-1/4 h-10 p-2 bg-gray-700 text-gray-300">
               {result[index] ? `gas: ${result[index].gasUsed}` : ''}
             </div>
+          </div>
+          <div className="flex flex-row bg-gray-300">
+          {result[index]?.response && <p className="w-1/2">Returned: {result[index].response}</p>}
+          {result[index]?.logs && result[index]?.logs.length > 0 &&
+            <div>Logs: 
+              {result[index]?.logs.map((l) => <p>{l.eventName}({l.args?.join(', ')})</p>)}
+            </div>
+          }
+          </div>
           </div>
         ))}
       </div>
