@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Abi, Address, DecodeEventLogReturnType, Hex, decodeEventLog, decodeFunctionResult, encodeFunctionData } from 'viem';
+import { Abi, Address, DecodeEventLogReturnType, Hex, decodeEventLog, decodeFunctionResult, encodeFunctionData, trim } from 'viem';
+import { useDebounce } from './hooks/useDebounce';
 
 const defaultSolidityCode = `
 contract SimpleStorage {
@@ -17,12 +18,12 @@ contract SimpleStorage {
     function get() public view returns (uint256) {
         return storedData;
     }
+
+    function getBlockNumber() public view returns (uint256) {
+      return block.number;
+  }
 }
 `;
-
-interface CompileResponse {
-  Con
-}
 
 type Log = {
   address: Address, 
@@ -46,7 +47,7 @@ type ContractData = {
 
 const IndexPage = () => {
   const [solidityCode, setSolidityCode] = useState(defaultSolidityCode);
-  const [functionCalls, setFunctionCalls] = useState('');
+  const [functionCalls, setFunctionCalls] = useState('get()\nset(1)\nget()\ngetBlockNumber()');
   const [bytecode, setBytecode] = useState('');
   const [abi, setAbi] = useState<Abi>([]);
   const [result, setResult] = useState<Array<{ call: string; gasUsed: string, response: string | undefined, logs: DecodeEventLogReturnType[]}>>([]);
@@ -84,11 +85,14 @@ const IndexPage = () => {
          calls.push({ name, args });
        }
      });
-     handleFunctionCalls(calls)
+     if (bytecode && calls.length > 0) {
+      debouncedHandleFunctionCalls(calls);
+    }
   }, [bytecode, functionCalls])
 
   const handleFunctionCalls = async (parsedCalls: { name: string; args: string[] }[]) => {
     if (!abi.length) return;
+    console.log('in handle function calls')
 
     const calls: {calldata: Hex, value: String, caller: Address}[] = []
     for (const call of parsedCalls) {
@@ -142,8 +146,15 @@ const IndexPage = () => {
     }
   };
 
+  const debouncedHandleFunctionCalls = useDebounce(handleFunctionCalls, 500);
+
   const handleFunctionCallsChange = (e: React.ChangeEvent<HTMLTextAreaElement>, index: number) => {
+    const trimmed = e.target.value.trim()
     const newFunctionCalls = functionCalls.split('\n');
+    // if (newFunctionCalls[index].trim() == trimmed) {
+    //   console.log('returning')
+    //   return
+    // }
     newFunctionCalls[index] = e.target.value;
     setFunctionCalls(newFunctionCalls.join('\n'));
   };
@@ -191,11 +202,11 @@ const IndexPage = () => {
           </div>
           <div className="flex flex-row justify-between bg-gray-300">
           {result[index] && <p className="font-mono">Returned: {result[index].response}</p>}
-          {/* {result[index] &&
+          {result[index] &&
             <div className="w-1/2 float-right font-mono">Logs: 
               {result[index]?.logs.map((l, i) => <p key={i}>{l.eventName}({l.args?.join(', ')})</p>)}
             </div>
-          } */}
+          }
           </div>
           </div>
         ))}
