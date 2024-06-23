@@ -163,6 +163,7 @@ const IndexPage = () => {
       if (e === null) {
         // Delete operation
         newCalls.splice(index, 1);
+        result.splice(index, 1);
       } else {
         // Update operation
         newCalls[index] = e.target.value;
@@ -208,6 +209,7 @@ const IndexPage = () => {
       {/* Function Calls and Results */}
       <div className="w-full md:w-1/2 p-4 overflow-y-auto">
         <div className="space-y-4">
+          <p className="text-gray-800 italic">State forked from <a className='underline' target="_blank" href="https://basescan.org/">Base.</a></p>
         {functionCalls.map((call, index) => (
           <div key={index} className="bg-white shadow-sm rounded-lg overflow-hidden">
             <div className="flex items-center p-2 bg-gray-50">
