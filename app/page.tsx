@@ -21,8 +21,7 @@ contract SimpleStorage {
 `;
 
 interface CompileResponse {
-  abi: string;
-  bytecode: string;
+  Con
 }
 
 type Log = {
@@ -31,9 +30,23 @@ type Log = {
   topics: Hex[]
 }
 
+type ExecutionResponse = {
+  exitReason: string,
+  reverted: boolean,
+  result: Hex,
+  gasUsed: string,
+  logs: any[]
+}
+
+type ContractData = {
+  name: string, 
+  abi: string,
+  bytecode: string
+}
+
 const IndexPage = () => {
   const [solidityCode, setSolidityCode] = useState(defaultSolidityCode);
-  const [functionCalls, setFunctionCalls] = useState('set(1)\nget()\nset(2)\nget()');
+  const [functionCalls, setFunctionCalls] = useState('');
   const [bytecode, setBytecode] = useState('');
   const [abi, setAbi] = useState<Abi>([]);
   const [result, setResult] = useState<Array<{ call: string; gasUsed: string, response: string | undefined, logs: DecodeEventLogReturnType[]}>>([]);
@@ -42,9 +55,12 @@ const IndexPage = () => {
     const compileSolidity = async () => {
       const updatedCode = `pragma solidity 0.8.26;\n${solidityCode}`;
       try {
-        const response = await axios.post<CompileResponse>(process.env.NEXT_PUBLIC_SERVER + '/compile_solidity', { code: updatedCode });
-        setBytecode(response.data.bytecode);
-        setAbi(JSON.parse(response.data.abi));
+        const response = await axios.post<ContractData[]>(process.env.NEXT_PUBLIC_SERVER + '/compile_solidity', { code: updatedCode });
+        if (response.data.length > 0) {
+          const last = response.data.length - 1;
+          setBytecode(response.data[last].bytecode);
+          setAbi(JSON.parse(response.data[last].abi));
+        }
       } catch (error) {
         console.error('Compilation error:', error);
       }
@@ -89,8 +105,8 @@ const IndexPage = () => {
 
     try {
       const response = await axios.post<
-        {Success: {gas_used: string, output: {Call: Hex}, logs: Log[]}}[]
-      >(process.env.NEXT_PUBLIC_SERVER + '/execute_calldatas', {
+      ExecutionResponse[]
+      >(process.env.NEXT_PUBLIC_SERVER + '/execute_calldatas_fork', {
         bytecode,
         calls
       });
@@ -102,10 +118,10 @@ const IndexPage = () => {
         const returned = decodeFunctionResult({
           abi,
           functionName: parsedCalls[i].name,
-          data: result.Success.output.Call
+          data: result.result
         })
         const logs: DecodeEventLogReturnType[] = []
-        for (const log of result.Success.logs) {
+        for (const log of result.logs) {
           logs.push(decodeEventLog({
             abi,
             data: log.data,
@@ -114,7 +130,7 @@ const IndexPage = () => {
         }
         output.push({ 
               call: parsedCalls[i].name, 
-              gasUsed: result.Success.gas_used, 
+              gasUsed: result.gasUsed, 
               response: returned != undefined ? String(returned) : undefined,
               logs
             })
@@ -153,10 +169,11 @@ const IndexPage = () => {
       <div className="w-1/2 flex flex-col p-6 space-y-4 bg-gray-800 h-screen rounded">
         <p className="text-gray-300">pragma solidity 0.8.26;</p>
         <textarea
-          className="w-full h-full p-4 bg-gray-800 text-gray-300 border border-gray-700 rounded resize-none"
+          className="w-full h-full p-4 bg-gray-800 text-gray-300 border border-gray-700 rounded resize-none whitespace-pre overflow-x-auto"
           value={solidityCode}
           onChange={(e) => setSolidityCode(e.target.value)}
           onKeyDown={handleKeyDown}
+          wrap="off"
         />
       </div>
       <div className="w-1/2 flex flex-col space-y-2">
@@ -174,11 +191,11 @@ const IndexPage = () => {
           </div>
           <div className="flex flex-row justify-between bg-gray-300">
           {result[index] && <p className="font-mono">Returned: {result[index].response}</p>}
-          {result[index] &&
+          {/* {result[index] &&
             <div className="w-1/2 float-right font-mono">Logs: 
               {result[index]?.logs.map((l, i) => <p key={i}>{l.eventName}({l.args?.join(', ')})</p>)}
             </div>
-          }
+          } */}
           </div>
           </div>
         ))}
