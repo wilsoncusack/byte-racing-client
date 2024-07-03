@@ -1,4 +1,4 @@
-import { DecodeEventLogReturnType } from "viem";
+import type { DecodeEventLogReturnType } from "viem";
 import FunctionCallItem from "./FunctionCallItem";
 
 export type FunctionCallResult = {
@@ -35,7 +35,10 @@ interface FunctionCallsPanelProps {
   functionCalls: string[];
   result: Array<FunctionCallResult>;
   addFunctionCall: () => void;
-  handleFunctionCallsChange: (e: React.ChangeEvent<HTMLTextAreaElement> | null, index: number) => void;
+  handleFunctionCallsChange: (
+    e: React.ChangeEvent<HTMLTextAreaElement> | null,
+    index: number,
+  ) => void;
 }
 
 const FunctionCallsPanel: React.FC<FunctionCallsPanelProps> = ({
@@ -47,7 +50,17 @@ const FunctionCallsPanel: React.FC<FunctionCallsPanelProps> = ({
   return (
     <div className="w-full md:w-1/2 p-4 overflow-y-auto">
       <div className="space-y-4">
-        <p className="text-gray-800 italic">State forked from <a className='underline' target="_blank" href="https://basescan.org/">Base.</a></p>
+        <p className="text-gray-800 italic">
+          State forked from{" "}
+          <a
+            className="underline"
+            target="_blank"
+            href="https://basescan.org/"
+            rel="noreferrer"
+          >
+            Base.
+          </a>
+        </p>
         {functionCalls.map((call, index) => (
           <FunctionCallItem
             key={index}
@@ -68,4 +81,4 @@ const FunctionCallsPanel: React.FC<FunctionCallsPanelProps> = ({
   );
 };
 
-export default FunctionCallsPanel
+export default FunctionCallsPanel;

@@ -1,15 +1,23 @@
 import { DecodeEventLogReturnType } from "viem";
-import { FunctionCallResult } from "./FunctionCallsPanel";
+import type { FunctionCallResult } from "./FunctionCallsPanel";
 import ResultDisplay from "./ResultDisplay";
 
 interface FunctionCallItemProps {
   call: string;
   index: number;
   result?: FunctionCallResult;
-  handleFunctionCallsChange: (e: React.ChangeEvent<HTMLTextAreaElement> | null, index: number) => void;
+  handleFunctionCallsChange: (
+    e: React.ChangeEvent<HTMLTextAreaElement> | null,
+    index: number,
+  ) => void;
 }
 
-const FunctionCallItem: React.FC<FunctionCallItemProps> = ({ call, index, result, handleFunctionCallsChange }) => {
+const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
+  call,
+  index,
+  result,
+  handleFunctionCallsChange,
+}) => {
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
       <div className="flex items-center p-2 bg-gray-50">
@@ -26,8 +34,17 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({ call, index, result
           className="ml-2 p-1 text-red-500 hover:bg-red-100 rounded"
           onClick={() => handleFunctionCallsChange(null, index)}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
           </svg>
         </button>
       </div>
@@ -36,4 +53,4 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({ call, index, result
   );
 };
 
-export default FunctionCallItem
+export default FunctionCallItem;
