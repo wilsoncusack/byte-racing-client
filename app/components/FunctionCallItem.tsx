@@ -23,7 +23,7 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
       <div className="flex items-center p-2 bg-gray-50">
         <div className="flex-grow relative">
           <textarea
-            className="w-full p-2 bg-white text-gray-800 resize-none focus:outline-none font-mono border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+            className="w-full h-20 p-2 bg-white text-gray-800 resize-none focus:outline-none font-mono border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
             value={call}
             onChange={(e) => handleFunctionCallsChange(e, index)}
             rows={1}

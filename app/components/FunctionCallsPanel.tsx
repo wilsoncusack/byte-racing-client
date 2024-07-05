@@ -50,17 +50,6 @@ const FunctionCallsPanel: React.FC<FunctionCallsPanelProps> = ({
   return (
     <div className="w-full md:w-1/2 p-4 overflow-y-auto">
       <div className="space-y-4">
-        <p className="text-gray-800 italic">
-          State forked from{" "}
-          <a
-            className="underline"
-            target="_blank"
-            href="https://basescan.org/"
-            rel="noreferrer"
-          >
-            Base.
-          </a>
-        </p>
         {functionCalls.map((call, index) => (
           <FunctionCallItem
             key={index}

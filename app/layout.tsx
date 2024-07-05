@@ -6,8 +6,8 @@ import { Analytics } from "@vercel/analytics/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "EVM REPL",
-  description: "EVM REPL",
+  title: "BYTERACING",
+  description: "Compete for EVM efficiency",
 };
 
 export default function RootLayout({

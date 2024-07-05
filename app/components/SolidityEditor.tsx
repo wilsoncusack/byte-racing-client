@@ -30,13 +30,14 @@ const SolidityEditor: React.FC<SolidityEditorProps> = ({
       {relevantErrors.length > 0 && (
         <CompileErrorDisplay errors={relevantErrors} />
       )}
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+      <div className="bg-black opacity-85 shadow-lg rounded-lg overflow-hidden border border-gray-200">
         <div className="relative flex h-[calc(100vh-10rem)] p-4">
           <Editor
             height="100%"
             defaultLanguage="sol"
             value={solidityCode}
             onChange={(value) => setSolidityCode(value || "")}
+            theme="hc-black"
             options={{
               minimap: { enabled: false },
               scrollBeyondLastLine: false,

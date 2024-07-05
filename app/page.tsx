@@ -20,21 +20,20 @@ import FunctionCallsPanel, {
 
 const defaultSolidityCode = `pragma solidity 0.8.26;
 
-contract SimpleStorage {
-    uint256 public storedData;
-    event StoredDataUpdated(uint);
+contract Car {
+  enum Move { Up, Down, Left, Right }
 
-    function set(uint256 x) public {
-        storedData = x;
-        emit StoredDataUpdated(x);
-    }
+  struct Position {
+    uint64 x;
+    uint64 y;
+  }
 
-    function get() public view returns (uint256) {
-        return storedData;
-    }
-
-    function getBlockNumber() public view returns (uint256) {
-      return block.number;
+  function getNextMove(int8[][] calldata map, bytes calldata prevContext) 
+      external 
+      returns (Move move, bytes memory nextContext) 
+  {
+    // Implementation here
+    return (Move.Right, "");
   }
 }
 `;
@@ -72,10 +71,7 @@ type ExecutionResponse = {
 const IndexPage = () => {
   const [solidityCode, setSolidityCode] = useState(defaultSolidityCode);
   const [functionCalls, setFunctionCalls] = useState<string[]>([
-    "get()",
-    "set(1)",
-    "get()",
-    "getBlockNumber()",
+    `getNextMove([[1, 0, 0, 0], [0, 0, 0, 0]], "")`,
   ]);
   const [bytecode, setBytecode] = useState("");
   const [abi, setAbi] = useState<Abi>([]);
@@ -125,19 +121,43 @@ const IndexPage = () => {
   }, [solidityCode]);
 
   useEffect(() => {
-    //  const functionCallsArray = functionCalls.split('\n');
-    const calls: { name: string; args: string[] }[] = [];
-    functionCalls.forEach((line, index) => {
-      const call = line.match(/(\w+)\((.*)\)/);
-      if (call) {
-        const name = call[1];
-        const args = call[2]
-          .split(",")
-          .map((arg) => arg.trim())
-          .filter((arg) => arg !== "");
+    const parseArgument = (arg: string): any => {
+      try {
+        return JSON.parse(arg);
+      } catch {
+        return arg;
+      }
+    };
+
+    const calls: { name: string; args: any[] }[] = [];
+    functionCalls.forEach((line) => {
+      const match = line.match(/(\w+)\((.*)\)/);
+      if (match) {
+        const name = match[1];
+        const argsString = match[2];
+
+        // Split args, respecting nested structures
+        const args = [];
+        let currentArg = "";
+        let nestLevel = 0;
+        for (let char of argsString) {
+          if (char === "," && nestLevel === 0) {
+            args.push(parseArgument(currentArg.trim()));
+            currentArg = "";
+          } else {
+            if (char === "[" || char === "{") nestLevel++;
+            if (char === "]" || char === "}") nestLevel--;
+            currentArg += char;
+          }
+        }
+        if (currentArg) {
+          args.push(parseArgument(currentArg.trim()));
+        }
+
         calls.push({ name, args });
       }
     });
+    console.log("calls", calls);
     if (bytecode && calls.length > 0) {
       debouncedHandleFunctionCalls(calls);
     }
@@ -230,18 +250,20 @@ const IndexPage = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-100">
-      <SolidityEditor
-        solidityCode={solidityCode}
-        setSolidityCode={setSolidityCode}
-        errors={compilationErrors}
-      />
-      <FunctionCallsPanel
-        functionCalls={functionCalls}
-        result={result}
-        addFunctionCall={addFunctionCall}
-        handleFunctionCallsChange={handleFunctionCallsChange}
-      />
+    <div className="bg-container">
+      <div className="flex flex-col md:flex-row h-screen">
+        <SolidityEditor
+          solidityCode={solidityCode}
+          setSolidityCode={setSolidityCode}
+          errors={compilationErrors}
+        />
+        <FunctionCallsPanel
+          functionCalls={functionCalls}
+          result={result}
+          addFunctionCall={addFunctionCall}
+          handleFunctionCallsChange={handleFunctionCallsChange}
+        />
+      </div>
     </div>
   );
 };
