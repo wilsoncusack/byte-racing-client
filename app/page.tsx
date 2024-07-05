@@ -18,7 +18,8 @@ import FunctionCallsPanel, {
   type FunctionCallResult,
 } from "./components/FunctionCallsPanel";
 
-const defaultSolidityCode = `
+const defaultSolidityCode = `pragma solidity 0.8.26;
+
 contract SimpleStorage {
     uint256 public storedData;
     event StoredDataUpdated(uint);
@@ -83,11 +84,10 @@ const IndexPage = () => {
 
   useEffect(() => {
     const compileSolidity = async () => {
-      const updatedCode = `pragma solidity 0.8.26;\n${solidityCode}`;
       try {
         const response = await axios.post<SolcCompileResponse>(
           `${process.env.NEXT_PUBLIC_SERVER}/compile_solidity`,
-          { code: updatedCode },
+          { code: solidityCode },
         );
 
         if (response.data.data.length > 0) {
