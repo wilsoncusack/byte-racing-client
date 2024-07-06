@@ -416,17 +416,38 @@ const IndexPage = () => {
         title="What is This?"
         content={
           <p>
-            Since the dawn of time, programmers have 
-            competed to write the most efficient code.
-            The 
-            <a href="https://ethereum.org/en/developers/docs/evm/" className="underline"> Ethereum Virtual Machine (EVM)</a>,
-            where every operation has a "gas" accounting, offers a new frontier in this contest. 
-            <br/>
-            <br/>
-            The goal of this game is to produce the most efficient EVM bytecode for navigating mazes. 
-            <br/>
-            <br/>
+            Since the dawn of time, programmers have competed to write the most
+            efficient code. The
+            <a
+              href="https://ethereum.org/en/developers/docs/evm/"
+              className="underline"
+            >
+              {" "}
+              Ethereum Virtual Machine (EVM)
+            </a>
+            , where every operation has a "gas" accounting, offers a new
+            frontier in this contest.
+            <br />
+            <br />
+            The goal of this game is to produce the most efficient EVM bytecode
+            for navigating mazes.
+            <br />
+            <br />
             Today, this site is a playground, but more is coming soon.
+            <br />
+            <br />
+            Credit to{" "}
+            <a href="https://speedtracer.com/" className="underline">
+              Speedtracer{" "}
+            </a>
+            and{" "}
+            <a
+              href="https://x.com/transmissions11/status/1561100140160593920"
+              className="underline"
+            >
+              0xManaco
+            </a>{" "}
+            for inspiring many of the ideas here.
           </p>
         }
       />
