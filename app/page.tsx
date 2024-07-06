@@ -21,6 +21,7 @@ import GameMap from "./components/GameMap";
 import generateRandomMap from "./utils/generateRandomMap";
 import { pressStart2P } from "./lib/fonts";
 import ArcadeModal from "./components/ArcadeModal";
+import { Pirsch } from "pirsch-sdk/web";
 
 const defaultSolidityCode = `pragma solidity 0.8.26;
 
@@ -215,6 +216,14 @@ const IndexPage = () => {
   ]);
   const [raceResult, setRaceResult] = useState<RaceResult | null>(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  useEffect(() => {
+    const pirsch = new Pirsch({
+      identificationCode: "auPvWdXpZYJMo8FlQXSmtNx5SiQQ9F3G",
+    });
+
+    pirsch.hit();
+  }, []);
 
   useEffect(() => {
     const compileSolidity = async () => {
