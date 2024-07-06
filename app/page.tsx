@@ -20,6 +20,7 @@ import FunctionCallsPanel, {
 import GameMap from "./components/GameMap";
 import generateRandomMap from "./utils/generateRandomMap";
 import { pressStart2P } from "./lib/fonts";
+import ArcadeModal from "./components/ArcadeModal";
 
 const defaultSolidityCode = `pragma solidity 0.8.26;
 
@@ -213,6 +214,7 @@ const IndexPage = () => {
     [1, 0, 0, 0, 1, 0],
   ]);
   const [raceResult, setRaceResult] = useState<RaceResult | null>(null);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
   useEffect(() => {
     const compileSolidity = async () => {
@@ -408,8 +410,31 @@ const IndexPage = () => {
 
   return (
     <div className="bg-container">
+      <ArcadeModal
+        isOpen={modalIsOpen}
+        onClose={() => setModalIsOpen(false)}
+        title="What is This?"
+        content={
+          <p>
+            Since the dawn of time, programmers have 
+            competed to write the most efficient code.
+            The 
+            <a href="https://ethereum.org/en/developers/docs/evm/" className="underline"> Ethereum Virtual Machine (EVM)</a>,
+            where every operation has a "gas" accounting, offers a new frontier in this contest. 
+            <br/>
+            <br/>
+            The goal of this game is to produce the most efficient EVM bytecode for navigating mazes. 
+            <br/>
+            <br/>
+            Today, this site is a playground, but more is coming soon.
+          </p>
+        }
+      />
       <div className=" p-10">
-        <button className={`arcade-button p-10 ${pressStart2P.className}`}>
+        <button
+          className={`arcade-button p-10 ${pressStart2P.className}`}
+          onClick={() => setModalIsOpen(true)}
+        >
           What is This?
         </button>
       </div>

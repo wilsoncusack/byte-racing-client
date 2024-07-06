@@ -146,3 +146,58 @@ body {
   background: rgba(0, 0, 0, 0.1);
   box-shadow: 0 0 5px #ff9900, 0 0 15px #ff9900, inset 0 0 5px #ff9900;
 }
+
+.arcade-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid #ffffff;
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 80%;
+  width: 500px;
+  box-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff, inset 0 0 20px #ff00ff;
+  z-index: 1000;
+}
+
+.modal-title {
+  font-family: 'Press Start 2P', monospace;
+  color: #ffffff;
+  font-size: 24px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.modal-content {
+  font-family: Arial, sans-serif;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-family: 'Press Start 2P', monospace;
+  color: #ffffff;
+  font-size: 20px;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+/* Variations for blue and orange modals */
+.arcade-modal-blue {
+  box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff, inset 0 0 20px #00ffff;
+}
+
+.arcade-modal-orange {
+  box-shadow: 0 0 20px #ff9900, 0 0 40px #ff9900, inset 0 0 20px #ff9900;
+}
