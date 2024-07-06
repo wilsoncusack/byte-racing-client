@@ -25,26 +25,35 @@ const GameMap: React.FC<GameMapProps> = ({
   const getOutcomeColor = (outcome: string) => {
     switch (outcome) {
       case "Finish":
-        return "#22c55e"; // green
+        return "#00ff00"; // neon green
       case "Crash":
-        return "#ef4444"; // red
+        return "#ff00ff"; // neon pink
       case "Revert":
-        return "#eab308"; // yellow
+        return "#ffff00"; // neon yellow
       case "Halt":
-        return "#3b82f6"; // blue
+        return "#00ffff"; // neon cyan
       default:
-        return "#6b7280"; // gray
+        return "#ff8800"; // neon orange
     }
   };
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+      <defs>
+        <filter id="neonGlow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+          <feMerge>
+            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <rect width={width} height={height} fill="#120d1e" />
       <g opacity="0.95">
         {map.map((row, rowIndex) =>
           row.map((cell, cellIndex) => {
             const x = cellIndex * cellSize;
             const y = rowIndex * cellSize;
-
             return (
               <g key={`${rowIndex}-${cellIndex}`}>
                 <rect
@@ -53,10 +62,11 @@ const GameMap: React.FC<GameMapProps> = ({
                   width={cellSize}
                   height={cellSize}
                   fill={
-                    cell === 0 ? "white" : cell === 1 ? "#6b7280" : "#ef4444"
+                    cell === 0 ? "#1e1a2e" : cell === 1 ? "#3d3a4f" : "#ff00ff"
                   }
-                  stroke="#374151"
-                  strokeWidth="1"
+                  stroke="#6e7dff"
+                  strokeWidth="0.5"
+                  filter="url(#neonGlow)"
                 />
                 {cell === -1 && (
                   <text
@@ -65,6 +75,8 @@ const GameMap: React.FC<GameMapProps> = ({
                     fontSize={cellSize * 0.7}
                     textAnchor="middle"
                     dominantBaseline="central"
+                    fill="#00ffff"
+                    filter="url(#neonGlow)"
                   >
                     🏁
                   </text>
@@ -73,22 +85,25 @@ const GameMap: React.FC<GameMapProps> = ({
             );
           }),
         )}
-
         {/* Draw path */}
         <path
-          d={`M ${path[0].x * cellSize + cellSize / 2} ${path[0].y * cellSize + cellSize / 2} 
-           ${path
-             .slice(1)
-             .map(
-               (p) =>
-                 `L ${p.x * cellSize + cellSize / 2} ${p.y * cellSize + cellSize / 2}`,
-             )
-             .join(" ")}`}
+          d={`M ${path[0].x * cellSize + cellSize / 2} ${
+            path[0].y * cellSize + cellSize / 2
+          }
+          ${path
+            .slice(1)
+            .map(
+              (p) =>
+                `L ${p.x * cellSize + cellSize / 2} ${
+                  p.y * cellSize + cellSize / 2
+                }`,
+            )
+            .join(" ")}`}
           stroke={getOutcomeColor(outcome)}
           strokeWidth="3"
           fill="none"
+          filter="url(#neonGlow)"
         />
-
         {/* Draw car at the end of the path */}
         <text
           x={path[path.length - 1].x * cellSize + cellSize / 2}
@@ -96,17 +111,19 @@ const GameMap: React.FC<GameMapProps> = ({
           fontSize={cellSize * 0.7}
           textAnchor="middle"
           dominantBaseline="central"
+          fill="#ffffff"
+          filter="url(#neonGlow)"
         >
           {outcome === "Finish"
-            ? "🚘"
+            ? "🏎️"
             : outcome === "Crash"
-              ? "🚘💥"
+              ? "💥"
               : outcome === "Revert"
-                ? "🚘❗️"
+                ? "⚠️"
                 : outcome === "Halt"
-                  ? "🚘🚫"
-                  : outcome == "MaxGas"
-                    ? "⛽️"
+                  ? "🛑"
+                  : outcome === "MaxGas"
+                    ? "⛽"
                     : ""}
         </text>
       </g>

@@ -22,6 +22,8 @@ import generateRandomMap from "./utils/generateRandomMap";
 
 const defaultSolidityCode = `pragma solidity 0.8.26;
 
+/// @notice Write your byteracing car and compete to be 
+/// the most gas efficient to solve the mazes. 
 contract Car {
   /// @dev Represents a move on the game map 
   /// NOTE Arrays are 0 indexed and so (0,0) is top left
@@ -415,30 +417,43 @@ const IndexPage = () => {
           <div className="mt-5 flex flex-col ">
             <div className="">
               {raceResult && (
-                <div className=" ">
-                  <div className="bg-black p-2 rounded-lg opacity-95 mb-2">
-                    <p className="text-green-400">
-                      Outcome: {raceResult.outcome}
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="bg-gradient-to-r from-purple-900 to-indigo-900 p-4 rounded-lg shadow-lg border border-pink-500 w-full max-w-md">
+                    <p className="text-cyan-400 font-mono text-lg mb-2">
+                      Outcome:{" "}
+                      <span className="text-pink-500 font-bold">
+                        {raceResult.outcome}
+                      </span>
                     </p>
                     {raceResult.message && (
-                      <p className="text-green-400">
-                        Failure reason: {raceResult.message}
+                      <p className="text-cyan-400 font-mono text-lg mb-2">
+                        Failure reason:{" "}
+                        <span className="text-yellow-400">
+                          {raceResult.message}
+                        </span>
                       </p>
                     )}
-                    <p className="text-green-400">
-                      Gas Used: {raceResult.gas_used}
+                    <p className="text-cyan-400 font-mono text-lg">
+                      Gas Used:{" "}
+                      <span className="text-green-400 font-bold">
+                        {raceResult.gas_used}
+                      </span>
                     </p>
                   </div>
-
-                  <GameMap
-                    cellSize={40}
-                    outcome={raceResult.outcome}
-                    path={raceResult.path}
-                    map={map}
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 blur opacity-25"></div>
+                    <div className="relative">
+                      <GameMap
+                        cellSize={40}
+                        outcome={raceResult.outcome}
+                        path={raceResult.path}
+                        map={map}
+                      />
+                    </div>
+                  </div>
                   <button
                     onClick={regenerateMap}
-                    className="bg-[#f92585] text-white font-bold py-2 px-4 rounded"
+                    className="bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:from-pink-700 hover:to-purple-700 transform hover:scale-105 transition duration-200 ease-in-out"
                   >
                     Regenerate Map
                   </button>
