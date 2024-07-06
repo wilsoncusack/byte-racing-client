@@ -45,7 +45,7 @@ const TraceDisplay: React.FC<TraceDisplayProps> = ({ traces }) => {
       <div
         key={trace.idx}
         className="font-mono text-sm"
-        style={{ marginLeft: `${depth * 20}px` }}
+        style={{ marginLeft: `${depth * 20}px`, whiteSpace: "nowrap" }}
       >
         <div>
           [{trace.idx}] {trace.trace.kind} {trace.trace.address}
@@ -69,7 +69,7 @@ const TraceDisplay: React.FC<TraceDisplayProps> = ({ traces }) => {
   const traceTree = buildTraceTree(traces.arena);
 
   return (
-    <div className="mt-4 p-4 bg-gray-800 text-green-400 rounded overflow-x-auto whitespace-pre">
+    <div className="mt-4 p-4 bg-gray-800 text-green-400 rounded whitespace-pre overflow-x-auto">
       {traceTree.map((node) => renderTraceNode(node))}
     </div>
   );

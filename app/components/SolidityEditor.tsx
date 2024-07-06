@@ -48,6 +48,9 @@ const SolidityEditor: React.FC<SolidityEditorProps> = ({
               lineNumbersMinChars: 0,
               overviewRulerBorder: false,
               language: "sol",
+              guides: {
+                indentation: false,
+              },
             }}
           />
         </div>

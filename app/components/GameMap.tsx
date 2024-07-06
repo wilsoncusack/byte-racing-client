@@ -1,4 +1,5 @@
 import React from "react";
+import { Outcome } from "../page";
 
 interface Position {
   x: number;
@@ -8,7 +9,7 @@ interface Position {
 interface GameMapProps {
   map: number[][];
   path: Position[];
-  outcome: "Finish" | "Crash" | "Revert" | "Halt";
+  outcome: Outcome;
   cellSize?: number;
 }
 
@@ -96,7 +97,17 @@ const GameMap: React.FC<GameMapProps> = ({
           textAnchor="middle"
           dominantBaseline="central"
         >
-          🚗
+          {outcome === "Finish"
+            ? "🚘"
+            : outcome === "Crash"
+              ? "🚘💥"
+              : outcome === "Revert"
+                ? "🚘❗️"
+                : outcome === "Halt"
+                  ? "🚘🚫"
+                  : outcome == "MaxGas"
+                    ? "⛽️"
+                    : ""}
         </text>
       </g>
     </svg>

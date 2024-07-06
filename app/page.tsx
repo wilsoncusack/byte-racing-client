@@ -18,10 +18,17 @@ import FunctionCallsPanel, {
   type FunctionCallResult,
 } from "./components/FunctionCallsPanel";
 import GameMap from "./components/GameMap";
+import generateRandomMap from "./utils/generateRandomMap";
 
 const defaultSolidityCode = `pragma solidity 0.8.26;
 
 contract Car {
+  /// @dev Represents a move on the game map 
+  /// NOTE Arrays are 0 indexed and so (0,0) is top left
+  /// Up = y - 1, x
+  /// Down = y + 1, x
+  /// Left = y, x - 1
+  /// Right = y, x + 1
   enum Move { Up, Down, Left, Right }
 
   struct Position {
@@ -29,12 +36,120 @@ contract Car {
     uint64 y;
   }
 
-  function getNextMove(int8[][] calldata map, bytes calldata prevContext) 
-      external 
-      returns (Move move, bytes memory nextContext) 
+  /// @dev Struct used for example solution
+  struct Context {
+    Position position;
+    Move lastMove;
+    uint64 visitedCount;
+  }
+
+  /// @dev Convenience value for checkPosition
+  int8 constant OUT_OF_BOUNDS = type(int8).max;
+
+  /// @dev This is the core function for the game. Do not delete or change function signature
+  /// @param map The game map, where 
+  /// 0 = open space 
+  /// 1 = wall / obstacle 
+  /// -1 = finish line
+  /// @param prevContext The nextContext from the previous call
+  /// NOTE on first call is abi.encode(Position(<start position>))
+  /// @return move The move to make
+  /// @return nextContext The next context
+  function getNextMove(int8[][] calldata map, bytes calldata prevContext)
+  external pure
+  returns (Move move, bytes memory nextContext)
   {
-    // Implementation here
-    return (Move.Right, "");
+    // Example implementation, please edit
+    
+    Position memory position;
+    Context memory context;
+    bool isInitialMove = prevContext.length == 64;
+    
+    if (isInitialMove) {
+        position = abi.decode(prevContext, (Position));
+        context = Context(position, Move.Up, 0);
+    } else {
+        context = abi.decode(prevContext, (Context));
+    }
+    
+    int8 up = checkPosition(Move.Up, context.position, map);
+    int8 right = checkPosition(Move.Right, context.position, map);
+    int8 down = checkPosition(Move.Down, context.position, map);
+    int8 left = checkPosition(Move.Left, context.position, map);
+    
+    // Check if we've reached the finish
+    if (up == -1) return (Move.Up, abi.encode(updateContext(context, Move.Up)));
+    if (right == -1) return (Move.Right, abi.encode(updateContext(context, Move.Right)));
+    if (down == -1) return (Move.Down, abi.encode(updateContext(context, Move.Down)));
+    if (left == -1) return (Move.Left, abi.encode(updateContext(context, Move.Left)));
+    
+    // Array to store valid moves
+    Move[4] memory validMoves;
+    uint8 validMoveCount = 0;
+    
+    // Check each direction and add to valid moves if it's open
+    if (up == 0 && context.lastMove != Move.Down) {
+        validMoves[validMoveCount++] = Move.Up;
+    }
+    if (right == 0 && context.lastMove != Move.Left) {
+        validMoves[validMoveCount++] = Move.Right;
+    }
+    if (down == 0 && context.lastMove != Move.Up) {
+        validMoves[validMoveCount++] = Move.Down;
+    }
+    if (left == 0 && context.lastMove != Move.Right) {
+        validMoves[validMoveCount++] = Move.Left;
+    }
+    
+    // If there are valid moves, choose the first one
+    if (validMoveCount > 0) {
+        Move chosenMove = validMoves[0];
+        return (chosenMove, abi.encode(updateContext(context, chosenMove)));
+    }
+    
+    // If no valid moves, try to backtrack
+    if (up == 0) return (Move.Up, abi.encode(updateContext(context, Move.Up)));
+    if (right == 0) return (Move.Right, abi.encode(updateContext(context, Move.Right)));
+    if (down == 0) return (Move.Down, abi.encode(updateContext(context, Move.Down)));
+    if (left == 0) return (Move.Left, abi.encode(updateContext(context, Move.Left)));
+    
+    // If completely stuck, reset visited count and move up (or another default direction)
+    context.visitedCount = 0;
+    return (Move.Up, abi.encode(updateContext(context, Move.Up)));
+  }
+
+  /// @dev Helper function for example solution
+  function updateContext(Context memory context, Move newMove) private pure returns (Context memory) {
+      context.lastMove = newMove;
+      context.visitedCount++;
+      
+      if (newMove == Move.Up && context.position.y > 0) context.position.y--;
+      else if (newMove == Move.Down) context.position.y++;
+      else if (newMove == Move.Left && context.position.x > 0) context.position.x--;
+      else if (newMove == Move.Right) context.position.x++;
+      
+      return context;
+  }
+
+  /// @dev Helper function for example solution
+  function checkPosition(Move move, Position memory position, int8[][] memory map) private pure returns (int8) {
+      if (move == Move.Up) {
+          if (position.y == 0) return OUT_OF_BOUNDS;
+          return map[position.y - 1][position.x];
+      }
+      if (move == Move.Down) {
+          if (position.y >= map.length - 1) return OUT_OF_BOUNDS;
+          return map[position.y + 1][position.x];
+      }
+      if (move == Move.Left) {
+          if (position.x == 0) return OUT_OF_BOUNDS;
+          return map[position.y][position.x - 1];
+      }
+      if (move == Move.Right) {
+          if (position.x >= map[0].length - 1) return OUT_OF_BOUNDS;
+          return map[position.y][position.x + 1];
+      }
+      return OUT_OF_BOUNDS;
   }
 }
 `;
@@ -69,6 +184,15 @@ type ExecutionResponse = {
   traces: FunctionCallResult["traces"];
 };
 
+export type Outcome = "Finish" | "Crash" | "Revert" | "Halt" | "MaxGas";
+
+export interface RaceResult {
+  path: { x: number; y: number }[];
+  outcome: Outcome;
+  gas_used: number;
+  message?: string;
+}
+
 const IndexPage = () => {
   const [solidityCode, setSolidityCode] = useState(defaultSolidityCode);
   const [functionCalls, setFunctionCalls] = useState<string[]>([
@@ -78,6 +202,14 @@ const IndexPage = () => {
   const [abi, setAbi] = useState<Abi>([]);
   const [result, setResult] = useState<Array<FunctionCallResult>>([]);
   const [compilationErrors, setCompilationErrors] = useState<SolcError[]>([]);
+  const [map, setMap] = useState([
+    [0, 0, 0, 1, 1, 1],
+    [1, 1, 0, 0, 1, -1],
+    [1, 0, 0, 0, 1, 0],
+    [1, 0, 1, 0, 0, 0],
+    [1, 0, 0, 0, 1, 0],
+  ]);
+  const [raceResult, setRaceResult] = useState<RaceResult | null>(null);
 
   useEffect(() => {
     const compileSolidity = async () => {
@@ -122,6 +254,22 @@ const IndexPage = () => {
   }, [solidityCode]);
 
   useEffect(() => {
+    const updateRaceResponse = async () => {
+      if (bytecode == "") return;
+      const raceResponse = await axios.post(
+        `${process.env.NEXT_PUBLIC_SERVER}/byterace`,
+        {
+          map: map,
+          bytecode: bytecode,
+        },
+      );
+
+      setRaceResult(raceResponse.data);
+    };
+    updateRaceResponse();
+  }, [bytecode, map]);
+
+  useEffect(() => {
     const parseArgument = (arg: string): any => {
       try {
         return JSON.parse(arg);
@@ -158,7 +306,7 @@ const IndexPage = () => {
         calls.push({ name, args });
       }
     });
-    console.log("calls", calls);
+
     if (bytecode && calls.length > 0) {
       debouncedHandleFunctionCalls(calls);
     }
@@ -226,6 +374,10 @@ const IndexPage = () => {
     }
   };
 
+  const regenerateMap = () => {
+    setMap(generateRandomMap(6, 5));
+  };
+
   const debouncedHandleFunctionCalls = useDebounce(handleFunctionCalls, 500);
 
   const addFunctionCall = () => {
@@ -258,12 +410,48 @@ const IndexPage = () => {
           setSolidityCode={setSolidityCode}
           errors={compilationErrors}
         />
-        <FunctionCallsPanel
+        <div>
+          <div className="mt-5 flex flex-col ">
+            <div className="">
+              {raceResult && (
+                <div className=" ">
+                  <div className="bg-black p-2 rounded-lg opacity-95 mb-2">
+                    <p className="text-green-400">
+                      Outcome: {raceResult.outcome}
+                    </p>
+                    {raceResult.message && (
+                      <p className="text-green-400">
+                        Failure reason: {raceResult.message}
+                      </p>
+                    )}
+                    <p className="text-green-400">
+                      Gas Used: {raceResult.gas_used}
+                    </p>
+                  </div>
+
+                  <GameMap
+                    cellSize={40}
+                    outcome={raceResult.outcome}
+                    path={raceResult.path}
+                    map={map}
+                  />
+                  <button
+                    onClick={regenerateMap}
+                    className="bg-[#f92585] text-white font-bold py-2 px-4 rounded"
+                  >
+                    Regenerate Map
+                  </button>
+                </div>
+              )}
+            </div>
+            {/* <FunctionCallsPanel
           functionCalls={functionCalls}
           result={result}
           addFunctionCall={addFunctionCall}
           handleFunctionCallsChange={handleFunctionCallsChange}
-        />
+        /> */}
+          </div>
+        </div>
       </div>
     </div>
   );
