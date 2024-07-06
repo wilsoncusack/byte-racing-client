@@ -10,7 +10,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
   const [showTraces, setShowTraces] = useState(false);
 
   return (
-    <div className="p-4 bg-gray-50 border-t border-gray-200 space-y-3">
+    <div className="p-4 bg-black border-t border-gray-200 space-y-3">
       <div className="flex items-baseline">
         <span className="text-sm font-semibold text-gray-600 w-20">
           Returned:

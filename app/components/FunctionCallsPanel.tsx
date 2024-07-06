@@ -1,5 +1,6 @@
 import type { DecodeEventLogReturnType } from "viem";
 import FunctionCallItem from "./FunctionCallItem";
+import GameMap from "./GameMap";
 
 export type FunctionCallResult = {
   call: string;
@@ -49,6 +50,32 @@ const FunctionCallsPanel: React.FC<FunctionCallsPanelProps> = ({
 }) => {
   return (
     <div className="w-full md:w-1/2 p-4 overflow-y-auto">
+      <div className="flex justify-center items-center p-2">
+        <GameMap
+          cellSize={40}
+          outcome="Finish"
+          path={[
+            { x: 0, y: 0 },
+            { x: 1, y: 0 },
+            { x: 2, y: 0 },
+            { x: 2, y: 1 },
+            { x: 2, y: 2 },
+            { x: 3, y: 2 },
+            { x: 3, y: 3 },
+            { x: 4, y: 3 },
+            { x: 5, y: 3 },
+            { x: 5, y: 2 },
+            { x: 5, y: 1 },
+          ]}
+          map={[
+            [0, 0, 0, 1, 1, 1],
+            [1, 1, 0, 0, 1, -1],
+            [1, 0, 0, 0, 1, 0],
+            [1, 0, 1, 0, 0, 0],
+            [1, 0, 0, 0, 1, 0],
+          ]}
+        />
+      </div>
       <div className="space-y-4">
         {functionCalls.map((call, index) => (
           <FunctionCallItem

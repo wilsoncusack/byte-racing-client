@@ -17,6 +17,7 @@ import SolidityEditor from "./components/SolidityEditor";
 import FunctionCallsPanel, {
   type FunctionCallResult,
 } from "./components/FunctionCallsPanel";
+import GameMap from "./components/GameMap";
 
 const defaultSolidityCode = `pragma solidity 0.8.26;
 
