@@ -60,7 +60,7 @@ contract Car {
   returns (Move move, bytes memory nextContext)
   {
     // Example implementation, please edit
-    
+
     Position memory position;
     Context memory context;
     bool isInitialMove = prevContext.length == 64;
@@ -254,6 +254,7 @@ const IndexPage = () => {
   }, [solidityCode]);
 
   useEffect(() => {
+    setRaceResult(null);
     const updateRaceResponse = async () => {
       if (bytecode == "") return;
       const raceResponse = await axios.post(
