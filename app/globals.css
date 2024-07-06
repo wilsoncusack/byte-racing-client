@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -33,4 +34,115 @@ body {
   background-repeat: no-repeat;
   min-height: 100vh;
   width: 100%;
+}
+
+.retro-button {
+  background: linear-gradient(to bottom, #ff00ff, #b300b3);
+  color: #ffffff;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  font-size: 18px;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+  /* text-shadow: 0 0 5px #ffffff; */
+  transition: all 0.3s ease;
+}
+
+.retro-button:hover {
+  background: linear-gradient(to bottom, #ff33ff, #cc00cc);
+  box-shadow: 0 0 15px #ff33ff, 0 0 25px #ff33ff, 0 0 35px #ff33ff;
+  transform: scale(1.05);
+}
+
+.retro-button:active {
+  transform: scale(0.98);
+}
+
+.retro-button-orange {
+  background: linear-gradient(to bottom, #ff9900, #cc7a00);
+  box-shadow: 0 0 10px #ff9900, 0 0 20px #ff9900, 0 0 30px #ff9900;
+}
+
+.retro-button-blue {
+  background: linear-gradient(to bottom, #00ffff, #00cccc);
+  box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+}
+
+.arcade-button {
+  background: rgba(0, 0, 0, 0.0);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #ffffff;
+  font-family: var(--font-press-start-2p), monospace;
+  font-size: 17px;
+  text-transform: uppercase;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: 2px solid #ffffff;
+  border-radius: 15px;
+  /* text-shadow: 0 0 5px #ffffff; */
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.arcade-button::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid #ffffff;
+  border-radius: 15px;
+  opacity: 0.5;
+  z-index: -1;
+}
+
+/* Pink border (default) */
+.arcade-button {
+  box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, inset 0 0 10px #ff00ff;
+}
+
+.arcade-button:hover {
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff, inset 0 0 15px #ff00ff;
+}
+
+.arcade-button:active {
+  background: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 5px #ff00ff, 0 0 15px #ff00ff, inset 0 0 5px #ff00ff;
+}
+
+/* Blue border */
+.arcade-button-blue {
+  box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, inset 0 0 10px #00ffff;
+}
+
+.arcade-button-blue:hover {
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 15px #00ffff, 0 0 30px #00ffff, inset 0 0 15px #00ffff;
+}
+
+.arcade-button-blue:active {
+  background: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 5px #00ffff, 0 0 15px #00ffff, inset 0 0 5px #00ffff;
+}
+
+/* Orange border */
+.arcade-button-orange {
+  box-shadow: 0 0 10px #ff9900, 0 0 20px #ff9900, inset 0 0 10px #ff9900;
+}
+
+.arcade-button-orange:hover {
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 15px #ff9900, 0 0 30px #ff9900, inset 0 0 15px #ff9900;
+}
+
+.arcade-button-orange:active {
+  background: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 5px #ff9900, 0 0 15px #ff9900, inset 0 0 5px #ff9900;
 }

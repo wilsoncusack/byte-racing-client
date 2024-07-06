@@ -19,6 +19,7 @@ import FunctionCallsPanel, {
 } from "./components/FunctionCallsPanel";
 import GameMap from "./components/GameMap";
 import generateRandomMap from "./utils/generateRandomMap";
+import { pressStart2P } from "./lib/fonts";
 
 const defaultSolidityCode = `pragma solidity 0.8.26;
 
@@ -407,6 +408,11 @@ const IndexPage = () => {
 
   return (
     <div className="bg-container">
+      <div className=" p-10">
+        <button className={`arcade-button p-10 ${pressStart2P.className}`}>
+          What is This?
+        </button>
+      </div>
       <div className="flex flex-col md:flex-row h-screen">
         <SolidityEditor
           solidityCode={solidityCode}
@@ -418,22 +424,26 @@ const IndexPage = () => {
             <div className="">
               {raceResult && (
                 <div className="flex flex-col items-center space-y-4">
-                  <div className="bg-gradient-to-r from-purple-900 to-indigo-900 p-4 rounded-lg shadow-lg border border-pink-500 w-full max-w-md">
-                    <p className="text-cyan-400 font-mono text-lg mb-2">
+                  <div
+                    className={`bg-gradient-to-r from-purple-900 to-indigo-900 p-4 rounded-lg shadow-lg border border-pink-500 w-full max-w-md ${pressStart2P.className}`}
+                  >
+                    <p
+                      className={`text-cyan-400 ${pressStart2P.className} text-md mb-2`}
+                    >
                       Outcome:{" "}
                       <span className="text-pink-500 font-bold">
                         {raceResult.outcome}
                       </span>
                     </p>
                     {raceResult.message && (
-                      <p className="text-cyan-400 font-mono text-lg mb-2">
+                      <p className="text-cyan-400 text-md mb-2">
                         Failure reason:{" "}
                         <span className="text-yellow-400">
                           {raceResult.message}
                         </span>
                       </p>
                     )}
-                    <p className="text-cyan-400 font-mono text-lg">
+                    <p className="text-cyan-400 text-md">
                       Gas Used:{" "}
                       <span className="text-green-400 font-bold">
                         {raceResult.gas_used}
@@ -453,7 +463,7 @@ const IndexPage = () => {
                   </div>
                   <button
                     onClick={regenerateMap}
-                    className="bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:from-pink-700 hover:to-purple-700 transform hover:scale-105 transition duration-200 ease-in-out"
+                    className={`arcade-button arcade-button-orange ${pressStart2P.className}`}
                   >
                     Regenerate Map
                   </button>
