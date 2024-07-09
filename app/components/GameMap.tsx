@@ -102,7 +102,7 @@ const GameMap: React.FC<GameMapProps> = ({
           stroke={getOutcomeColor(outcome)}
           strokeWidth="3"
           fill="none"
-          filter="url(#simpleGlow)"
+          filter={`url(#${outcome == "Crash" ? "simpleGlow" : "neonGlow"})`}
         />
         {/* Draw car at the end of the path */}
         <text
